@@ -1,0 +1,17 @@
+[package]
+name = "mdui"
+version = "0.1.0"
+edition = "2024"
+description = "A terminal markdown renderer with rich formatting, tables, and icon support"
+
+[dependencies]
+pulldown-cmark = { version = "0.13", default-features = false, features = ["simd"] }
+crossterm = "0.29"
+terminal_size = "0.4"
+textwrap = "0.16"
+unicode-width = "0.2"
+clap = { version = "4", features = ["derive"] }
+
+[profile.release]
+lto = true
+strip = true

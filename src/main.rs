@@ -1,8 +1,9 @@
+mod pager;
 mod render;
 
 use clap::Parser;
 use std::fs;
-use std::io::{self, Read};
+use std::io::{self, IsTerminal, Read};
 use std::path::PathBuf;
 
 /// mdui — Render Markdown beautifully in your terminal
@@ -11,6 +12,10 @@ use std::path::PathBuf;
 struct Cli {
     /// Markdown file to render (reads from stdin if omitted)
     file: Option<PathBuf>,
+
+    /// Open in interactive pager mode (scrollable, searchable)
+    #[arg(short, long)]
+    pager: bool,
 }
 
 fn main() -> io::Result<()> {
@@ -35,7 +40,14 @@ fn main() -> io::Result<()> {
     };
 
     let renderer = render::Renderer::new();
-    renderer.render(&markdown)?;
+
+    // Use pager if requested, or auto-detect when output is large and terminal is interactive
+    if cli.pager && io::stdout().is_terminal() {
+        let rendered = renderer.render_to_bytes(&markdown)?;
+        pager::run(&rendered)?;
+    } else {
+        renderer.render(&markdown)?;
+    }
 
     Ok(())
 }

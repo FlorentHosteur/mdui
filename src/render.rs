@@ -60,8 +60,18 @@ impl Renderer {
         }
     }
 
+    pub fn render_to_bytes(&self, markdown: &str) -> io::Result<Vec<u8>> {
+        let mut buf = Vec::new();
+        self.render_to(&mut buf, markdown)?;
+        Ok(buf)
+    }
+
     pub fn render(&self, markdown: &str) -> io::Result<()> {
         let mut out = io::stdout().lock();
+        self.render_to(&mut out, markdown)
+    }
+
+    fn render_to(&self, mut out: &mut (impl Write + ?Sized), markdown: &str) -> io::Result<()> {
         let mut opts = Options::empty();
         opts.insert(Options::ENABLE_TABLES);
         opts.insert(Options::ENABLE_STRIKETHROUGH);

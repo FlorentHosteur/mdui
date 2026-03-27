@@ -12,15 +12,17 @@ A Rust CLI tool that renders Markdown files beautifully in the terminal with col
 cargo build              # dev build
 cargo build --release    # optimized release (~1MB binary, LTO + strip)
 cargo run -- file.md     # render a file
+cargo run -- -p file.md  # render in interactive pager mode
 echo "# Hi" | cargo run  # pipe from stdin
 ```
 
 ## Architecture
 
-Two source files in `src/`:
+Three source files in `src/`:
 
-- **`main.rs`** — CLI entry point using `clap` derive. Reads file arg or stdin, passes content to renderer.
-- **`render.rs`** — The core rendering engine. Single `Renderer` struct that walks `pulldown-cmark` events and writes ANSI-styled output via `crossterm`.
+- **`main.rs`** — CLI entry point using `clap` derive. Reads file arg or stdin, routes to direct render or pager.
+- **`render.rs`** — The core rendering engine. Single `Renderer` struct that walks `pulldown-cmark` events and writes ANSI-styled output via `crossterm`. Can render to stdout or to a byte buffer (for pager).
+- **`pager.rs`** — Interactive pager using crossterm raw mode + alternate screen. Supports scrolling (arrows, page up/down, vim keys), search (`/` then `n`/`N`), and resize handling.
 
 ### Rendering approach
 
